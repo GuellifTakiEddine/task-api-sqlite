@@ -75,16 +75,23 @@ def create_task(task: TaskCreate):
             status_code=400,
             detail="Title cannot be empty"
         )
-    task_id = len(tasks) + 1
+    connection = get_connection()
 
-    new_task = {
+    cursor = connection.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        (task.title, False)
+    )
+    connection.commit()
+
+    task_id = cursor.lastrowid
+
+    connection.close()
+
+    return {
         "id": task_id,
         "title": task.title,
         "done": False
     }
-
-    tasks.append(new_task)
-    return new_task
 
 class TaskUpdate(BaseModel):
     title: str | None = None
